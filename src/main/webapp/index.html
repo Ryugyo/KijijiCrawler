@@ -1,0 +1,230 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1200,user-scalable=no"/>
+    <title>CSCC01 Assignment 3</title>
+    <style>
+        #header {
+            background-color:black;
+            color:white;
+            text-align:center;
+            padding:0px;
+
+        }
+        
+        .nav {
+            line-height: 30px;
+            background-color: #eeeeee;
+            height: 401px;
+            width: 464px;
+            float: left;
+        }
+        
+        #section {
+            width:350px;
+            float:left;
+            padding-left: 6px;
+        }
+        
+        #footer {
+            background-color:black;
+            color:white;
+            clear:both;
+            text-align:center;
+            padding:5px;
+            margin-top: 44%;
+        }
+
+        /*table*/
+        #tablebox{
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            width: 353%;
+            border-collapse: collapse;
+            height: 732px;
+        }
+
+        #tablebox td, #tablebox th {
+            font-size: 1em;
+            border: 1px solid #98bf21;
+            padding: 3px 7px 2px 7px;
+
+        }
+
+        #tablebox th {
+            font-size: 1.1em;
+            text-align: left;
+            padding-top: 5px;
+            padding-bottom: 4px;
+            background-color: #A7C942;
+            color: #ffffff;
+        }
+
+        #tablebox tr.alt td {
+            color: #000000;
+            background-color: #EAF2D3;
+        }
+
+        #tablebox tr td,th {
+            width: 10px;
+        }
+        
+    </style>
+</head>
+
+<body>
+
+<div id="header">
+    <h1>CSCC01 Assignment 3</h1>
+</div>
+
+<div class="nav">
+    <div class="nav">
+        <div id="piechart" style="width: 464px; height: 450px;"></div>
+    </div>
+    <div class="nav">
+        <div id="columnchart_values2" style="width: 464px; height: 450px;"></div>
+    </div>
+</div>
+
+
+<div id="section">
+    <h2 style="width: 1300px;">=========================Rentals List============================</h2>
+    <table id="tablebox">
+        <tr>
+            <th>index</th>
+            <th>address</th>
+            <th>price</th>
+            <th>type</th>
+            <th>size</th>
+        </tr>
+    </table>
+</div>
+
+<div id="footer">
+    By Tan Jiaxin and Saskia Tjioe
+</div>
+
+</body>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/vue.js"></script>
+
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+        $.ajax({
+            type: "post",
+            url: dataDBServletUrl,
+            contentType: "application/json",
+            success: function (res) {
+                var tdArr = document.getElementById('tablebox').firstElementChild;
+                var rdata=JSON.parse(res);
+                for(var i=0;i<rdata.length;i++){
+                    var tr = document.createElement("tr");
+                    if(i%2==0){
+                        tr.innerHTML = '<tr class="alt"><td >' + (i+1) + '</td><td >' + rdata[i].address + '</td><td >' + rdata[i].price + '</td><td >' + rdata[i].type + '</td><td >' + rdata[i].size + '</td></tr>';
+                    }else{
+                        tr.innerHTML = '<tr ><td >' + (i+1) + '</td><td >' + rdata[i].address + '</td><td >' + rdata[i].price + '</td><td >' + rdata[i].type + '</td><td >' + rdata[i].size + '</td></tr>';
+                    }
+                    tdArr.appendChild(tr);
+                }
+            },
+            error: function (res) {
+                msg(res.returnMsg);
+            }
+        });
+
+    }
+</script>
+
+<script type="text/javascript">
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        $.ajax({
+            type: "post",
+            url: typeDBServletUrl,
+            contentType: "application/json",
+            success: function (res) {
+                var rdata=JSON.parse(res);
+                var  data = google.visualization.arrayToDataTable([['Task', 'Hours per Day'], [rdata[0].type, rdata[0].price], [rdata[1].type, rdata[1].price], [rdata[2].type, rdata[2].price]
+                    , [rdata[3].type, rdata[3].price]]);
+                var options = {
+                    title: 'Rental Types',
+                    width: 464,
+                    height: 450
+                };
+                var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+
+                chart.draw(data, options);
+            },
+            error: function (res) {
+                msg(res.returnMsg);
+            }
+        });
+
+    }
+</script>
+
+<script type="text/javascript">
+    google.charts.load("current", {packages:['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+        $.ajax({
+            type: "post",
+            url: priceServerUrl,
+            contentType: "application/json",
+            success: function (res) {
+                var rdata=JSON.parse(res);
+                var test1=[["Element", "Density", { role: "style" } ],[rdata[0].type, rdata[0].price, rdata[0].color],[rdata[1].type, rdata[1].price, rdata[1].color],[rdata[2].type, rdata[2].price, rdata[2].color]
+                    ,[rdata[3].type, rdata[3].price, rdata[3].color]];
+                var data = google.visualization.arrayToDataTable(test1);
+                var view = new google.visualization.DataView(data);
+                view.setColumns([0, 1,
+                    { calc: "stringify",
+                        sourceColumn: 1,
+                        type: "string",
+                        role: "annotation" },
+                    2]);
+
+                var options = {
+                    title: "Rental Prices",
+                    width: 464,
+                    height: 400,
+                    bar: {groupWidth: "95%"},
+                    legend: { position: "none" }
+                };
+                var chart = new google.visualization.ColumnChart(document.getElementById("columnchart_values2"));
+                chart.draw(view, options);
+
+            },
+            error: function (res) {
+                msg(res.returnMsg);
+            }
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    var priceServerUrl='http://localhost:8080/cscc01/PriceDBServlet';
+    var typeDBServletUrl='http://localhost:8080/cscc01/TypeDBServlet';
+    var dataDBServletUrl='http://localhost:8080/cscc01/DataDBServlet';
+    var app = new Vue({
+        el: '#app',
+        data: {
+            tel: '',
+            tel2: '',
+            secret: '',
+            secret2: '',
+            secret3: '',
+            now:0
+        },
+    });
+
+    app.init()
+</script>
+</html>
